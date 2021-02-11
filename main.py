@@ -3,10 +3,12 @@ from api import Api
 import pandas as pd
 from tqdm import tqdm
 import threading
+import math
+from Proxy_List_Scrapper import Scrapper, Proxy, ScrapperException
 
 
 def main():
-    get_solutions(10)
+    get_solutions(30)
 
 
 # Write solution metadata to csv at the output folder per 200 competitions (contest id, submission id, programming language)
@@ -42,51 +44,61 @@ def get_solutions_metadata(output_folder):
 # Get solutions code and add it to the metadata files
 def get_solutions(amt_threads):
     scraper = Scraper()
+    contest_index = 0
 
     # Open the solutions metadata file where solutions will be coupled to
     solutions_df = pd.read_csv('data/solutions_800.csv')
 
-    # Add solution column
-    solutions_df['solution'] = ''
-
     # Get all unique contests in this dataset
     contests = list(solutions_df['contestId'].unique())
 
-    index = 0
+    for contest in contests:
+        print(f'starting with contest {contest}...')
+        contest_submissions = solutions_df[solutions_df['contestId']
+                                           == contest]['solutionId']
 
-    # Progress bar to indicate current progress and speed
-    pbar = tqdm(total=len(
-        solutions_df[solutions_df['contestId'].isin(contests[index: index + amt_threads])]))
+        # Work with amt of threads to parallelize the requests
+        threads = []
 
-    # Work with amt of threads to parallelize the requests (note that the max amount of threads is mainly limited by RAM)
-    threads = []
+        submissions_per_thread = math.ceil(
+            len(contest_submissions)/amt_threads)
 
-    for contest in contests[index: index + amt_threads]:
-        # Get solutions for the contests from the scraper
-        submissions = solutions_df[solutions_df['contestId'] == contest].copy()
-        threads.append(threading.Thread(
-            target=scraper.get_source_code_submissions, args=(submissions, pbar,)))
+        proxies = scraper.get_proxies()
 
-    for t in threads:
-        t.start()
+        # Progress bar to indicate current progress and speed
+        pbar = tqdm(total=len(contest_submissions))
 
-    for t in threads:
-        t.join()
+        for index in range(0, len(contest_submissions), submissions_per_thread):
+            # Get solutions for the contests from the scraper
 
-        # Every time one thread is done, a new one can start scraping another contest
-        if index + amt_threads < len(contests):
+            threads.append(
+                threading.Thread(
+                    target=scraper.get_source_code_submissions,
+                    args=(contest,
+                          contest_submissions[index: index + submissions_per_thread], proxies, pbar,)
+                )
+            )
 
-            index += 1
+        for t in threads:
+            t.start()
 
-            pbar = tqdm(total=len(
-                solutions_df[solutions_df['contestId'].isin(contests[index: index + amt_threads])]))
+        for t in threads:
+            t.join()
 
-            submissions = solutions_df[solutions_df['contestId']
-                                       == contests[index + amt_threads - 1]].copy()
-            thread = threading.Thread(
-                target=scraper.get_source_code_submissions, args=(submissions, pbar,))
-            thread.start()
-            threads.append(thread)
+        # # Every time one thread is done, a new one can start scraping another contest
+        # if index + amt_threads < len(contests):
+
+        #     index += 1
+
+        #     pbar = tqdm(total=len(
+        #         solutions_df[solutions_df['contestId'].isin(contests[index: index + amt_threads])]))
+
+        #     submissions = solutions_df[solutions_df['contestId']
+        #                                == contests[index + amt_threads - 1]].copy()
+        #     thread = threading.Thread(
+        #         target=scraper.get_source_code_submissions, args=(submissions, pbar,))
+        #     thread.start()
+        #     threads.append(thread)
 
 
 if __name__ == "__main__":
