@@ -118,8 +118,11 @@ class Scraper():
         country_codes = ['AF', 'AL', 'AM', 'AR', 'AT', 'AU', 'BA', 'BD', 'BG', 'BO', 'BR', 'BY', 'CA', 'CL', 'CM', 'CN', 'CO', 'CZ', 'DE', 'EC', 'EG', 'ES', 'FR', 'GB', 'GE', 'GN', 'GR', 'GT', 'HK', 'HN', 'HU', 'ID', 'IN', 'IQ', 'IR', 'IT', 'JP', 'KE', 'KG',
                          'KH', 'KR', 'KZ', 'LB', 'LT', 'LV', 'LY', 'MD', 'MM', 'MN', 'MU', 'MW', 'MX', 'MY', 'NG', 'NL', 'NO', 'NP', 'PE', 'PH', 'PK', 'PL', 'PS', 'PY', 'RO', 'RS', 'RU', 'SC', 'SE', 'SG', 'SK', 'SY', 'TH', 'TR', 'TW', 'TZ', 'UA', 'UG', 'US', 'VE', 'VN', 'ZA']
 
-        for country_code in tqdm(country_codes):
-            proxies += Prawler.get_proxy_list(99999,
-                                              "http", "all", country_code)
+        try:
+            for country_code in tqdm(country_codes):
+                proxies += Prawler.get_proxy_list(99999,
+                                                  "http", "all", country_code)
+        except:
+            print('Could not get all proxies')
 
         return list(set(proxies))
