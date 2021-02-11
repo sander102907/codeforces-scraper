@@ -81,8 +81,6 @@ class Scraper():
             # output.to_csv(
             #     f'data/contests_solutions/{contest}.csv', index=False)
 
-            print(f'Thread finished')
-
         except Exception as e:
             proxy_index += 1
             self.get_request(proxies, proxy_index, contest_id,
