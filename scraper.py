@@ -2,10 +2,10 @@ from bs4 import BeautifulSoup
 import requests
 from tqdm import tqdm
 import random
-from fake_useragent import UserAgent
 import os
 from Proxy_List_Scrapper import Scrapper, Proxy, ScrapperException
-import Prawler
+import urllib.request
+import json
 
 
 '''
@@ -26,8 +26,7 @@ class Scraper():
     # Fetch the actual code via requests (recursive to reselect proxies if needed)
     def get_request(self, proxies, proxy_index, contest_id, submission_ids, submission_index, pbar):
         # Specify a random user agent
-        ua = UserAgent()
-        headers = {'User-Agent': ua.random}
+        headers = {'User-Agent': 'anything'}
 
         # if all proxies have been exhausted, get new list of proxies
         if proxy_index >= len(proxies):
@@ -66,22 +65,13 @@ class Scraper():
                 text_file.write(solution)
                 text_file.close()
 
-                # Set the code at the correct row of the CSV
-                # submissions_data.loc[
-                #     (submissions_data['solutionId']
-                #      == submission[1]["solutionId"])
-                #     & (submissions_data['contestId'] == submission[1]["contestId"]),
-                #     'solution'] = solution
 
                 # update where we are for if we need to update the proxy and update the progress bar
                 submission_index += 1
                 pbar.update()
 
-            # Save the output to csv
-            # output.to_csv(
-            #     f'data/contests_solutions/{contest}.csv', index=False)
 
-        except Exception as e:
+        except Exception:
             proxy_index += 1
             self.get_request(proxies, proxy_index, contest_id,
                              submission_ids, submission_index, pbar)
@@ -111,18 +101,31 @@ class Scraper():
                 except IndexError:
                     continue
 
+        url = "https://api.proxyscrape.com/?request=getproxies&timeout=500"
+        response =  urllib.request.urlopen(url).read().decode('utf-8').split("\r\n")
+        proxies += [i for i in response if i]
+
         scrapper = Scrapper(category='ALL', print_err_trace=False)
 
         proxies += [f'{proxy.ip}:{proxy.port}' for proxy in scrapper.getProxies().proxies]
 
-        country_codes = ['AF', 'AL', 'AM', 'AR', 'AT', 'AU', 'BA', 'BD', 'BG', 'BO', 'BR', 'BY', 'CA', 'CL', 'CM', 'CN', 'CO', 'CZ', 'DE', 'EC', 'EG', 'ES', 'FR', 'GB', 'GE', 'GN', 'GR', 'GT', 'HK', 'HN', 'HU', 'ID', 'IN', 'IQ', 'IR', 'IT', 'JP', 'KE', 'KG',
-                         'KH', 'KR', 'KZ', 'LB', 'LT', 'LV', 'LY', 'MD', 'MM', 'MN', 'MU', 'MW', 'MX', 'MY', 'NG', 'NL', 'NO', 'NP', 'PE', 'PH', 'PK', 'PL', 'PS', 'PY', 'RO', 'RS', 'RU', 'SC', 'SE', 'SG', 'SK', 'SY', 'TH', 'TR', 'TW', 'TZ', 'UA', 'UG', 'US', 'VE', 'VN', 'ZA']
+        url = "http://spys.me/proxy.txt"
+        response =  urllib.request.urlopen(url).read().decode('utf-8').split("\n\n")[1].split("\r")[:-1][0].split("\n")
+        response = [i for i in response if i]
+        for line in response:
+            proxies.append(line.split(" ")[0])
 
-        try:
-            for country_code in tqdm(country_codes):
-                proxies += Prawler.get_proxy_list(99999,
-                                                  "http", "all", country_code)
-        except:
-            print('Could not get all proxies')
+
+        url = "https://www.proxy-list.download/api/v1/get?type=http"
+
+        response =  urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(response).read().decode('utf-8').split("\r\n")
+        proxies += [i for i in response if i]
+
+        url = "https://www.proxyscan.io/api/proxy?last_check=3800&limit=20&type=https"
+
+        response = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+        for proxy in response:
+            proxies.append('{}:{}'.format(proxy["Ip"], proxy["Port"]))
 
         return list(set(proxies))
