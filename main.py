@@ -9,7 +9,9 @@ import os
 
 
 def main():
-    get_solutions(30)
+    # get_solutions(40)
+    scraper = Scraper()
+    scraper.get_problems_data()
 
 
 # Write solution metadata to csv at the output folder per 200 competitions (contest id, submission id, programming language)
@@ -41,7 +43,7 @@ def get_solutions_metadata(output_folder):
     del submissions_data
 
 
-# Get solutions code and add it to the metadata files
+# Get solutions code and save them to txt in the data/contests_solutions directory (one directory per contest will be created)
 def get_solutions(amt_threads):
     scraper = Scraper()
 
