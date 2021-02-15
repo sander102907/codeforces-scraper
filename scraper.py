@@ -8,6 +8,7 @@ import selenium
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
 import time
+from proxies import Proxies
 
 '''
 Scraper class responsible for scraping actual contents of the codeforce website
@@ -25,7 +26,7 @@ class Scraper():
 
             # if all proxies have been exhausted, get new list of proxies
             if proxy_index >= len(proxies):
-                proxies = proxies.get_proxies()
+                proxies = Proxies.get_proxies()
                 proxy_index = 0
 
             # Set the proxy for the requests
