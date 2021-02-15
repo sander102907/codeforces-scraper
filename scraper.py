@@ -69,7 +69,7 @@ class Scraper():
             except Exception:
                 proxy_index += 1
                 iterations -= 1
-                get_source_code_submissions(proxies, proxy_index, contest_id,
+                Scraper.get_source_code_submissions(proxies, proxy_index, contest_id,
                                 submission_ids, pbar, submission_index, iterations)
 
 
