@@ -1,14 +1,11 @@
 import json
 import requests
 
-
 class Api():
-    def __init__(self):
-        self.site = 'https://codeforces.com/api/'
-
     # Returns a list of submission ids for a contest with the verdict 'OK' (hence they have no errors and solve the problem)
-    def get_accepted_submission_ids(self, contestId, accepted_submissions):
-        url = f'{self.site}contest.status?contestId={contestId}'
+    @staticmethod
+    def get_accepted_submission_ids(contest_id, accepted_submissions):
+        url = f'https://codeforces.com/api/contest.status?contestId={contest_id}'
 
         response = requests.get(url, headers={'User-agent': 'anything'})
 
@@ -22,13 +19,14 @@ class Api():
                         'problem': sol['problem']['index'],
                         'programmingLangauge': sol['programmingLanguage']
                     }
-        except:
+        except Exception:
             pass
 
         return accepted_submissions
 
-    def get_contest_ids(self):
-        url = f'{self.site}contest.list'
+    @staticmethod
+    def get_contest_ids():
+        url = f'https://codeforces.com/api/contest.list'
 
         response = requests.get(url)
 
