@@ -1,6 +1,4 @@
 # codeforces-scraper
-Scraper of solutions from codeforces competitions.
-
 This scraper can fetch problem data and ACCEPTED solutions from all passed competitions on codeforces.
 #### The problem data contains:
 - Contest ID
