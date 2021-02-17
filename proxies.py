@@ -15,12 +15,12 @@ class Proxies():
         proxies = []
 
         for url in urls:
-            soup = BeautifulSoup(requests.get(url).content, "html.parser")
+            try:
+                soup = BeautifulSoup(requests.get(url).content, "html.parser")
 
-            # Find the rows of the tables on the page
-            for row in soup.find("table", attrs={"id": "proxylisttable"}).find_all("tr")[1:]:
-                tds = row.find_all("td")
-                try:
+                # Find the rows of the tables on the page
+                for row in soup.find("table", attrs={"id": "proxylisttable"}).find_all("tr")[1:]:
+                    tds = row.find_all("td")
                     # Check if the proxy is https compatible
                     if tds[6].text.strip() == 'yes':
                         # Find the ip and host and add it to the list of proxies
@@ -28,8 +28,9 @@ class Proxies():
                         port = tds[1].text.strip()
                         host = f"{ip}:{port}"
                         proxies.append(host)
-                except IndexError:
-                    continue
+            except Exception:
+                continue
+
         try:
             url = "https://api.proxyscrape.com/?request=getproxies&timeout=500"
             response =  urllib.request.urlopen(url).read().decode('utf-8').split("\r\n")
