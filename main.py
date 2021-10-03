@@ -39,7 +39,7 @@ def get_solutions_metadata():
     contest_ids = Api.get_contest_ids()
 
     # Create folder to save data if it does not exist yet
-    os.makedirs(f'data/', exist_ok=True)
+    os.makedirs(f'data/contests_solutions_metadata', exist_ok=True)
 
     # Iterate over each contest
     for index, contest_id in tqdm(enumerate(contest_ids), total=len(contest_ids)):
@@ -51,7 +51,7 @@ def get_solutions_metadata():
         if index % 200 == 0 and index > 0:
             solutions_df = pd.DataFrame(submissions_data).transpose()
             solutions_df.index.name = 'solutionId'
-            solutions_df.to_csv(f'data/solutions_{index}.csv')
+            solutions_df.to_csv(f'data/contests_solutions_metadata/solutions_{index}.csv')
             del solutions_df
             submissions_data = {}
 
