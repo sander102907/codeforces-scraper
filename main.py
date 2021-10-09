@@ -9,27 +9,26 @@ import os
 import random
 import sys
 import numpy as np
+import argparse
 
-def main(args):
-    if 'get_solutions_metadata' in args:
+parser = argparse.ArgumentParser()
+parser.add_argument("--mode", "-m", type=str, choices=["get_solutions_metadata", "get_solutions", "get_problems_data", "merge_solutions_metada_code"])
+parser.add_argument("--num-threads", "-nt", type=int, default=40)
+args = parser.parse_args()
+
+
+def main():
+    if args.mode == 'get_solutions_metadata':
         get_solutions_metadata()
-    elif 'get_solutions' in args:
-        if len(args) > 1:
-            try:
-                amt_threads = int(args[1])
-                get_solutions(amt_threads)
-            except Exception:
-                print('Please input the number of threads to fetch solutions as the second argument')
-        else:
-            get_solutions()
-    elif 'get_problems_data' in args:
+    elif args.mode == 'get_solutions':
+        get_solutions(args.num_threads)
+    elif args.mode == 'get_problems_data':
         Scraper.get_problems_data()
-    elif 'merge_solutions_metadata_code' in args:
+    elif args.mode == 'merge_solutions_metadata_code':
         merge_solutions_metadata_code()
     else:
         # Run this method by default
         get_solutions()
-
 
 # Write solution metadata to csv at the output folder per 200 competitions (contest id, submission id, programming language)
 def get_solutions_metadata():
@@ -139,7 +138,5 @@ def merge_solutions_metadata_code():
         data['solution'] = data.progress_apply(get_solution_code, axis=1)
         data.to_csv(f'data/contests_solutions/{metadata_file}', index=False)
 
-
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    main(args)
+    main()
