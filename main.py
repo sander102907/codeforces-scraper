@@ -124,7 +124,7 @@ def merge_solutions_metadata_code():
     if len(metadata_files) == 0:
         print('Run "get_solutions_metadata" first to fetch the solutions to scrape before running this function')
 
-    for metadata_file in metadata_file:
+    for metadata_file in metadata_files:
         # Open the solutions metadata file where solutions will be coupled to
         data = pd.read_csv(f'data/contests_solutions_metadata/{metadata_file}')
 
